@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rise & Fall of World Powers</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+  :root { --bg:#0d0a07; --parchment:#c8a96e; --gold:#d4a843; --gold-bright:#f0c040; --muted:#6b5a3e; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--parchment); font-family:'EB Garamond',Georgia,serif; min-height:100vh; }
+  .page { max-width:1440px; margin:0 auto; padding:36px 20px 56px; }
+  header { text-align:center; margin-bottom:32px; }
+  .title-ornament { color:var(--gold); font-size:1rem; letter-spacing:.4em; text-transform:uppercase; font-family:'Cinzel',serif; opacity:.7; margin-bottom:8px; }
+  h1 { font-family:'Cinzel Decorative',serif; font-size:clamp(1.3rem,3.5vw,2.5rem); color:var(--gold-bright); letter-spacing:.05em; line-height:1.2; text-shadow:0 0 40px rgba(212,168,67,.4); margin-bottom:10px; }
+  .subtitle { font-style:italic; color:var(--muted); font-size:1rem; }
+  .rule { border:none; border-top:1px solid var(--gold); opacity:.3; margin:16px auto; width:60%; }
+
+  .zoom-bar { display:flex; align-items:center; gap:12px; margin-bottom:8px; padding:9px 14px; background:rgba(200,169,110,0.04); border:1px solid rgba(200,169,110,0.12); flex-wrap:wrap; }
+  .zoom-bar label { font-family:'Cinzel',serif; font-size:.7rem; letter-spacing:.1em; color:var(--muted); white-space:nowrap; }
+  .zoom-btn { background:rgba(200,169,110,0.1); border:1px solid rgba(200,169,110,0.28); color:var(--parchment); font-size:1rem; width:26px; height:26px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s; flex-shrink:0; }
+  .zoom-btn:hover { background:rgba(200,169,110,0.22); }
+  #zoom-level { font-family:'Cinzel',serif; font-size:.76rem; color:var(--gold); min-width:38px; text-align:center; }
+  #zoom-slider { flex:1; min-width:120px; -webkit-appearance:none; appearance:none; height:3px; background:rgba(200,169,110,0.2); outline:none; cursor:pointer; }
+  #zoom-slider::-webkit-slider-thumb { -webkit-appearance:none; width:13px; height:13px; border-radius:50%; background:var(--gold); cursor:pointer; }
+  .zoom-hint { font-family:'Cinzel',serif; font-size:.63rem; color:var(--muted); white-space:nowrap; }
+
+  .chart-outer { position:relative; width:100%; overflow:hidden; border:1px solid rgba(200,169,110,0.1); cursor:grab; user-select:none; }
+  .chart-outer:active { cursor:grabbing; }
+  .chart-inner { position:relative; }
+  svg#chart { position:absolute; top:0; left:0; display:block; overflow:visible; }
+
+  .legend { display:flex; flex-wrap:wrap; gap:7px 18px; justify-content:center; margin-top:24px; padding:16px 20px; border:1px solid rgba(200,169,110,0.13); background:rgba(200,169,110,0.02); }
+  .legend-item { display:flex; align-items:center; gap:7px; cursor:pointer; padding:3px 7px; border-radius:3px; transition:background .2s,opacity .2s; font-family:'Cinzel',serif; font-size:.67rem; letter-spacing:.06em; color:var(--parchment); }
+  .legend-item:hover { background:rgba(200,169,110,0.1); }
+
+  #tooltip { position:fixed; pointer-events:none; z-index:200; background:rgba(13,10,7,.97); border:1px solid var(--gold); padding:12px 16px; max-width:270px; opacity:0; transition:opacity .15s; box-shadow:0 4px 30px rgba(0,0,0,.8); }
+  #tooltip.visible { opacity:1; }
+  #tooltip h3 { font-family:'Cinzel',serif; font-size:.82rem; color:var(--gold-bright); margin-bottom:5px; letter-spacing:.08em; }
+  #tooltip p { font-size:.8rem; color:var(--parchment); line-height:1.5; font-style:italic; }
+  #tooltip .dates { font-size:.72rem; color:var(--muted); margin-top:4px; font-family:'Cinzel',serif; }
+  #tooltip .proj-note { font-size:.7rem; color:#f97316; margin-top:3px; font-style:italic; display:none; }
+
+  .note { text-align:center; font-style:italic; color:var(--muted); font-size:.78rem; margin-top:20px; line-height:1.75; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="title-ornament">⸻ A Chronicle of Dominion ⸻</div>
+    <h1>Rise &amp; Fall of World Powers</h1>
+    <div class="subtitle">3000 BCE – 2125 CE &nbsp;·&nbsp; <span style="color:#f97316;font-style:normal;border-bottom:1px dashed #f97316;">dashed = projected</span></div>
+    <hr class="rule">
+  </header>
+
+  <div class="zoom-bar">
+    <label>ZOOM</label>
+    <button class="zoom-btn" id="zoom-out">−</button>
+    <input type="range" id="zoom-slider" min="1" max="20" step="0.05" value="1">
+    <button class="zoom-btn" id="zoom-in">+</button>
+    <span id="zoom-level">1.0×</span>
+    <button class="zoom-btn" id="zoom-reset" style="font-size:.65rem;width:auto;padding:0 8px;letter-spacing:.05em;">RESET</button>
+    <span class="zoom-hint">Scroll over chart to zoom · Drag to pan</span>
+  </div>
+
+  <div class="chart-outer" id="chart-outer">
+    <div class="chart-inner" id="chart-inner">
+      <svg id="chart"></svg>
+    </div>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <p class="note">
+    Height = relative global power (military, economic, cultural &amp; territorial reach).<br>
+    Hover any line for context. Dashed = speculative projection. Shaded band = China optimistic/pessimistic range.<br>
+    <span style="opacity:.6">Scroll to zoom · Drag to pan · Slider or ± buttons · Click legend to toggle</span>
+  </p>
+</div>
+
+<div id="tooltip">
+  <h3 id="tt-name"></h3>
+  <p id="tt-desc"></p>
+  <div class="dates" id="tt-dates"></div>
+  <div class="proj-note" id="tt-proj">⋯ Projected / speculative beyond 2025</div>
+</div>
+
+<script>
+const PROJ_START = 2025;
+const YEAR_MIN = -3000;
+const YEAR_MAX = 2125;
+const YEAR_SPAN = YEAR_MAX - YEAR_MIN;
+const PAD = {top:56, right:40, bottom:66, left:56};
+const H = 530;
+const PH = H - PAD.top - PAD.bottom;
+
+const empires = [
+  {
+    name:"Egyptian Empire", color:"#e8c94a",
+    desc:"The New Kingdom pharaohs commanded the ancient Mediterranean world — vast wealth, monumental architecture, and dominion from Nubia to the Levant.",
+    frames:[{y:-3000,p:5},{y:-2600,p:45},{y:-2400,p:55},{y:-2000,p:40},{y:-1550,p:60},{y:-1350,p:80},{y:-1250,p:75},{y:-1070,p:50},{y:-700,p:20},{y:-525,p:5},{y:-330,p:2}]
+  },
+  {
+    name:"Akkadian / Babylonian", color:"#c47a2a",
+    desc:"Sargon of Akkad forged the world's first true empire. Babylon later rose to cultural and commercial supremacy across Mesopotamia.",
+    frames:[{y:-2350,p:5},{y:-2300,p:62},{y:-2150,p:35},{y:-1900,p:20},{y:-1792,p:55},{y:-1600,p:40},{y:-1200,p:15},{y:-700,p:30},{y:-605,p:52},{y:-539,p:10},{y:-330,p:0}]
+  },
+  {
+    name:"Achaemenid Persia", color:"#8b5cf6",
+    desc:"Under Cyrus, Darius, and Xerxes, Persia became the largest empire the ancient world had seen — stretching from the Balkans to the Indus Valley.",
+    frames:[{y:-560,p:5},{y:-530,p:65},{y:-490,p:82},{y:-450,p:78},{y:-400,p:65},{y:-350,p:55},{y:-334,p:40},{y:-330,p:5}]
+  },
+  {
+    name:"Macedonian Empire", color:"#60a5fa",
+    desc:"Alexander the Great conquered from Greece to northwestern India in barely a decade, creating the largest empire the world had yet seen.",
+    frames:[{y:-336,p:5},{y:-330,p:75},{y:-323,p:80},{y:-310,p:55},{y:-280,p:30},{y:-200,p:10},{y:-150,p:2}]
+  },
+  {
+    name:"Roman Empire", color:"#ef4444",
+    desc:"From a city-state to master of the Mediterranean world. Rome's law, engineering, and culture shaped Western civilization for millennia.",
+    frames:[{y:-280,p:20},{y:-200,p:45},{y:-100,p:65},{y:-27,p:80},{y:100,p:90},{y:200,p:82},{y:300,p:68},{y:395,p:50},{y:410,p:38},{y:476,p:15},{y:550,p:5}]
+  },
+  {
+    name:"Han China", color:"#f97316",
+    desc:"The Han Dynasty consolidated China and projected power across Central Asia via the Silk Road, rivaling Rome in population, wealth, and sophistication.",
+    frames:[{y:-206,p:20},{y:-140,p:65},{y:-100,p:75},{y:0,p:70},{y:100,p:65},{y:184,p:40},{y:220,p:10},{y:280,p:5}]
+  },
+  {
+    name:"Byzantine Empire", color:"#a78bfa",
+    desc:"Eastern Rome survived the fall of the West, preserving Greco-Roman civilization for a thousand years and controlling key trade routes between Europe and Asia.",
+    frames:[{y:330,p:30},{y:500,p:55},{y:550,p:68},{y:700,p:48},{y:900,p:55},{y:1050,p:60},{y:1200,p:35},{y:1350,p:18},{y:1453,p:5}]
+  },
+  {
+    name:"Arab Caliphate", color:"#34d399",
+    desc:"The Islamic Caliphates — Rashidun, Umayyad, and Abbasid — swept from Iberia to Central Asia in a generation, unifying a vast world under one faith and language.",
+    frames:[{y:632,p:5},{y:660,p:60},{y:750,p:75},{y:820,p:80},{y:900,p:65},{y:1000,p:45},{y:1100,p:30},{y:1258,p:8},{y:1300,p:3}]
+  },
+  {
+    name:"Tang / Song China", color:"#fb923c",
+    desc:"Tang China was the most cosmopolitan civilization on Earth. Song China pioneered gunpowder, printing, and nautical technology while commanding global trade.",
+    frames:[{y:618,p:15},{y:660,p:62},{y:750,p:70},{y:800,p:60},{y:900,p:40},{y:960,p:52},{y:1050,p:65},{y:1127,p:45},{y:1200,p:50},{y:1279,p:10}]
+  },
+  {
+    name:"Mongol Empire", color:"#94a3b8",
+    desc:"In less than a century the Mongols assembled the largest contiguous land empire in history, shattering every rival from China to Poland.",
+    frames:[{y:1206,p:5},{y:1227,p:55},{y:1260,p:88},{y:1280,p:82},{y:1300,p:60},{y:1350,p:35},{y:1400,p:15},{y:1450,p:5}]
+  },
+  {
+    name:"Ottoman Empire", color:"#f43f5e",
+    desc:"At its height the Ottomans bridged three continents, controlled the most strategic straits in the world, and commanded Europe's most feared military.",
+    frames:[{y:1300,p:5},{y:1400,p:30},{y:1453,p:55},{y:1520,p:78},{y:1570,p:80},{y:1650,p:65},{y:1750,p:48},{y:1850,p:25},{y:1918,p:8},{y:1923,p:2}]
+  },
+  {
+    name:"Ming / Qing China", color:"#fbbf24",
+    desc:"Ming China led the world in GDP for centuries. The Qing expanded to the largest Chinese empire in history, commanding vast tribute and trade networks across Asia.",
+    frames:[{y:1368,p:30},{y:1420,p:60},{y:1500,p:65},{y:1600,p:60},{y:1700,p:65},{y:1750,p:68},{y:1820,p:65},{y:1850,p:40},{y:1900,p:15},{y:1912,p:5}]
+  },
+  {
+    name:"Spanish Empire", color:"#facc15",
+    desc:"Spain's New World conquests delivered unprecedented wealth. At its zenith it was the first empire called 'the one on which the sun never sets.'",
+    frames:[{y:1492,p:10},{y:1520,p:45},{y:1560,p:75},{y:1580,p:82},{y:1620,p:68},{y:1700,p:45},{y:1800,p:25},{y:1820,p:10},{y:1898,p:2}]
+  },
+  {
+    name:"British Empire", color:"#38bdf8",
+    desc:"At its peak the British Empire covered a quarter of Earth's land surface — the largest empire in history by territory, underpinning the modern global order.",
+    frames:[{y:1600,p:5},{y:1700,p:30},{y:1763,p:52},{y:1815,p:72},{y:1850,p:82},{y:1900,p:90},{y:1920,p:88},{y:1945,p:55},{y:1960,p:30},{y:1980,p:15},{y:2000,p:8},{y:2025,p:7}],
+    projected:[{y:2025,p:7},{y:2075,p:5},{y:2125,p:4}]
+  },
+  {
+    name:"United States", color:"#4ade80",
+    desc:"Emerging from WWII as the world's dominant industrial and military power, the US shaped the postwar order and remains the preeminent global superpower.",
+    frames:[{y:1890,p:15},{y:1920,p:35},{y:1945,p:78},{y:1960,p:82},{y:1991,p:95},{y:2000,p:92},{y:2010,p:85},{y:2025,p:80}],
+    projected:[{y:2025,p:80},{y:2040,p:75},{y:2060,p:68},{y:2080,p:60},{y:2100,p:54},{y:2125,p:50}]
+  },
+  {
+    name:"Modern China (PRC)", color:"#ff6b6b",
+    desc:"The People's Republic has engineered the fastest sustained economic expansion in history, becoming the largest economy by PPP and a peer competitor across technology, military, and geopolitical spheres. Its trajectory over the next century is the defining uncertainty of our era.",
+    frames:[{y:1949,p:4},{y:1960,p:7},{y:1978,p:9},{y:1990,p:15},{y:2000,p:26},{y:2010,p:47},{y:2020,p:64},{y:2025,p:70}],
+    // Central projection
+    projected:[{y:2025,p:70},{y:2035,p:78},{y:2048,p:84},{y:2060,p:86},{y:2080,p:83},{y:2100,p:78},{y:2125,p:72}],
+    // Scenario bounds for shaded band
+    projOpt:[{y:2025,p:70},{y:2035,p:83},{y:2048,p:93},{y:2060,p:96},{y:2080,p:92},{y:2100,p:88},{y:2125,p:84}],
+    projPes:[{y:2025,p:70},{y:2035,p:66},{y:2048,p:58},{y:2060,p:50},{y:2080,p:43},{y:2100,p:38},{y:2125,p:35}],
+    isNew: true
+  }
+];
+
+// ─── CHART ENGINE ────────────────────────────────────────────────────────────
+const outerEl = document.getElementById('chart-outer');
+const innerEl = document.getElementById('chart-inner');
+const svgEl   = document.getElementById('chart');
+const ttEl    = document.getElementById('tooltip');
+
+let zoom = 1, panX = 0;
+const MIN_ZOOM = 1, MAX_ZOOM = 20;
+let empireGroups = [];
+const hiddenSet = new Set();
+
+function outerW() { return outerEl.clientWidth || 1100; }
+function canvasW() { return Math.max(outerW(), outerW() * zoom); }
+function PW() { return canvasW() - PAD.left - PAD.right; }
+function clampPan(p) { return Math.max(0, Math.min(Math.max(0, canvasW()-outerW()), p)); }
+function xS(year) { return PAD.left + ((year - YEAR_MIN) / YEAR_SPAN) * PW(); }
+function yS(power) { return PAD.top + PH - (power/100)*PH; }
+function ns(t) { return document.createElementNS('http://www.w3.org/2000/svg', t); }
+
+function crPath(pts) {
+  if (pts.length < 2) return '';
+  let d = `M${pts[0].x},${pts[0].y}`;
+  for (let i = 0; i < pts.length-1; i++) {
+    const p0=pts[Math.max(i-1,0)], p1=pts[i], p2=pts[i+1], p3=pts[Math.min(i+2,pts.length-1)];
+    const a=0.45;
+    d += ` C${p1.x+(p2.x-p0.x)*a/3},${p1.y+(p2.y-p0.y)*a/3},${p2.x-(p3.x-p1.x)*a/3},${p2.y-(p3.y-p1.y)*a/3},${p2.x},${p2.y}`;
+  }
+  return d;
+}
+
+function pts(frames) { return frames.map(f=>({x:xS(f.y), y:yS(f.p)})); }
+
+function build() {
+  const cw = canvasW();
+  svgEl.setAttribute('width', cw);
+  svgEl.setAttribute('height', H);
+  innerEl.style.width = cw+'px';
+  innerEl.style.height = H+'px';
+  while (svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
+  empireGroups = [];
+
+  // DEFS
+  const defs = ns('defs');
+  const clip = ns('clipPath'); clip.id='pc';
+  const cr = ns('rect');
+  cr.setAttribute('x',PAD.left); cr.setAttribute('y',PAD.top);
+  cr.setAttribute('width',PW()); cr.setAttribute('height',PH);
+  clip.appendChild(cr); defs.appendChild(clip);
+  svgEl.appendChild(defs);
+
+  // BG
+  const bg = ns('rect');
+  bg.setAttribute('width',cw); bg.setAttribute('height',H); bg.setAttribute('fill','#0d0a07');
+  svgEl.appendChild(bg);
+
+  // ERA BANDS
+  const eras=[
+    {s:-3000,e:-500,l:'ANCIENT WORLD',alt:true},
+    {s:-500,e:500,l:'CLASSICAL',alt:false},
+    {s:500,e:1500,l:'MEDIEVAL',alt:true},
+    {s:1500,e:1800,l:'EARLY MODERN',alt:false},
+    {s:1800,e:PROJ_START,l:'MODERN',alt:true},
+    {s:PROJ_START,e:YEAR_MAX,l:'PROJECTED',future:true},
+  ];
+  eras.forEach(era=>{
+    const rx=xS(era.s), rw=xS(era.e)-rx;
+    const b=ns('rect');
+    b.setAttribute('x',rx); b.setAttribute('y',PAD.top);
+    b.setAttribute('width',rw); b.setAttribute('height',PH);
+    b.setAttribute('fill', era.future ? 'rgba(249,115,22,0.06)' : era.alt ? 'rgba(255,255,255,0.015)' : 'rgba(0,0,0,0)');
+    svgEl.appendChild(b);
+    const l=ns('text');
+    l.setAttribute('x',rx+rw/2); l.setAttribute('y',PAD.top-10);
+    l.setAttribute('text-anchor','middle');
+    l.setAttribute('fill', era.future ? 'rgba(249,115,22,0.38)' : 'rgba(200,169,110,0.28)');
+    l.setAttribute('font-family','Cinzel,serif'); l.setAttribute('font-size','9');
+    l.setAttribute('letter-spacing','1.5'); l.textContent=era.l;
+    svgEl.appendChild(l);
+  });
+
+  // "NOW" line
+  const nx=xS(PROJ_START);
+  const nl=ns('line');
+  nl.setAttribute('x1',nx);nl.setAttribute('x2',nx);
+  nl.setAttribute('y1',PAD.top);nl.setAttribute('y2',PAD.top+PH);
+  nl.setAttribute('stroke','rgba(249,115,22,0.4)');nl.setAttribute('stroke-width','1.2');
+  nl.setAttribute('stroke-dasharray','5,4');
+  svgEl.appendChild(nl);
+  const nt=ns('text');
+  nt.setAttribute('x',nx+4);nt.setAttribute('y',PAD.top+PH-6);
+  nt.setAttribute('fill','rgba(249,115,22,0.55)');nt.setAttribute('font-size','8');
+  nt.setAttribute('font-family','Cinzel,serif');nt.textContent='NOW';
+  svgEl.appendChild(nt);
+
+  // GRID H
+  [0,25,50,75,100].forEach(p=>{
+    const y=yS(p);
+    const l=ns('line');
+    l.setAttribute('x1',PAD.left);l.setAttribute('x2',PAD.left+PW());
+    l.setAttribute('y1',y);l.setAttribute('y2',y);
+    l.setAttribute('stroke',p===0||p===100?'rgba(200,169,110,0.22)':'rgba(200,169,110,0.08)');
+    l.setAttribute('stroke-width','1');
+    svgEl.appendChild(l);
+    if(p>0&&p<100){
+      const lb=ns('text');
+      lb.setAttribute('x',PAD.left-7);lb.setAttribute('y',y+4);
+      lb.setAttribute('text-anchor','end');lb.setAttribute('fill','rgba(200,169,110,0.3)');
+      lb.setAttribute('font-size','9.5');lb.setAttribute('font-family','Cinzel,serif');
+      lb.textContent=p; svgEl.appendChild(lb);
+    }
+  });
+
+  // YEAR TICKS
+  const step = zoom>=8?100:zoom>=3?200:500;
+  const t0 = Math.ceil(YEAR_MIN/step)*step;
+  for(let yr=t0;yr<=YEAR_MAX;yr+=step){
+    const x=xS(yr);
+    const tk=ns('line');
+    tk.setAttribute('x1',x);tk.setAttribute('x2',x);
+    tk.setAttribute('y1',PAD.top+PH);tk.setAttribute('y2',PAD.top+PH+6);
+    tk.setAttribute('stroke','rgba(200,169,110,0.32)');tk.setAttribute('stroke-width','1');
+    svgEl.appendChild(tk);
+    const vg=ns('line');
+    vg.setAttribute('x1',x);vg.setAttribute('x2',x);
+    vg.setAttribute('y1',PAD.top);vg.setAttribute('y2',PAD.top+PH);
+    vg.setAttribute('stroke','rgba(200,169,110,0.055)');vg.setAttribute('stroke-dasharray','3,7');
+    svgEl.appendChild(vg);
+    const lb=ns('text');
+    lb.setAttribute('x',x);lb.setAttribute('y',PAD.top+PH+19);
+    lb.setAttribute('text-anchor','middle');lb.setAttribute('fill','rgba(200,169,110,0.48)');
+    lb.setAttribute('font-size','9');lb.setAttribute('font-family','Cinzel,serif');
+    lb.textContent = yr<0?`${Math.abs(yr)} BCE`:(yr===0?'1 CE':`${yr}`);
+    svgEl.appendChild(lb);
+  }
+
+  // BCE/CE marker
+  const cx=xS(0);
+  const cl=ns('line');
+  cl.setAttribute('x1',cx);cl.setAttribute('x2',cx);
+  cl.setAttribute('y1',PAD.top);cl.setAttribute('y2',PAD.top+PH);
+  cl.setAttribute('stroke','rgba(200,169,110,0.35)');cl.setAttribute('stroke-dasharray','6,4');
+  svgEl.appendChild(cl);
+  const ct=ns('text');
+  ct.setAttribute('x',cx+4);ct.setAttribute('y',PAD.top+13);
+  ct.setAttribute('fill','rgba(200,169,110,0.4)');ct.setAttribute('font-size','8');
+  ct.setAttribute('font-family','Cinzel,serif');ct.textContent='BCE/CE';
+  svgEl.appendChild(ct);
+
+  // Y AXIS LABEL
+  const yl=ns('text');
+  yl.setAttribute('transform','rotate(-90)');
+  yl.setAttribute('x',-(PAD.top+PH/2));yl.setAttribute('y',15);
+  yl.setAttribute('text-anchor','middle');yl.setAttribute('fill','rgba(200,169,110,0.35)');
+  yl.setAttribute('font-size','9.5');yl.setAttribute('font-family','Cinzel,serif');
+  yl.setAttribute('letter-spacing','3');yl.textContent='RELATIVE GLOBAL POWER';
+  svgEl.appendChild(yl);
+
+  // China scenario band (draw before lines so lines appear on top)
+  const china = empires.find(e=>e.isNew);
+  if(china){
+    const optPts = pts(china.projOpt);
+    const pesPts = pts(china.projPes);
+    const allPts = [...optPts,...[...pesPts].reverse()];
+    const bandEl = ns('path');
+    bandEl.setAttribute('d','M '+allPts.map(p=>`${p.x},${p.y}`).join(' L ')+' Z');
+    bandEl.setAttribute('fill','#ff6b6b');bandEl.setAttribute('fill-opacity','0.09');
+    bandEl.setAttribute('clip-path','url(#pc)');
+    svgEl.appendChild(bandEl);
+    // Outer bounds dashed
+    [optPts,pesPts].forEach(bpts=>{
+      const bp=ns('path');
+      bp.setAttribute('d',crPath(bpts));bp.setAttribute('fill','none');
+      bp.setAttribute('stroke','#ff6b6b');bp.setAttribute('stroke-width','1');
+      bp.setAttribute('stroke-opacity','0.28');bp.setAttribute('stroke-dasharray','3,5');
+      bp.setAttribute('clip-path','url(#pc)');
+      svgEl.appendChild(bp);
+    });
+  }
+
+  // ─── DRAW EMPIRES ──────────────────────────────────────────────────────────
+  empires.forEach((emp,idx)=>{
+    const g=ns('g'); g.style.cursor='pointer';
+    const hPts = pts(emp.frames);
+    const hD = crPath(hPts);
+
+    // glow
+    const gw=ns('path');
+    gw.setAttribute('d',hD);gw.setAttribute('fill','none');
+    gw.setAttribute('stroke',emp.color);gw.setAttribute('stroke-width','8');
+    gw.setAttribute('stroke-opacity','0.09');gw.setAttribute('stroke-linecap','round');
+    gw.setAttribute('clip-path','url(#pc)');
+    g.appendChild(gw);
+
+    // main line
+    const ln=ns('path');
+    ln.setAttribute('d',hD);ln.setAttribute('fill','none');
+    ln.setAttribute('stroke',emp.color);ln.setAttribute('stroke-width','2.2');
+    ln.setAttribute('stroke-opacity','0.88');ln.setAttribute('stroke-linecap','round');
+    ln.setAttribute('clip-path','url(#pc)');
+    g.appendChild(ln);
+
+    // projected
+    let pln=null;
+    if(emp.projected){
+      const pPts=pts(emp.projected);
+      const pD=crPath(pPts);
+      const pgw=ns('path');
+      pgw.setAttribute('d',pD);pgw.setAttribute('fill','none');
+      pgw.setAttribute('stroke',emp.color);pgw.setAttribute('stroke-width','8');
+      pgw.setAttribute('stroke-opacity','0.07');pgw.setAttribute('clip-path','url(#pc)');
+      g.appendChild(pgw);
+      pln=ns('path');
+      pln.setAttribute('d',pD);pln.setAttribute('fill','none');
+      pln.setAttribute('stroke',emp.color);pln.setAttribute('stroke-width','2');
+      pln.setAttribute('stroke-opacity','0.65');pln.setAttribute('stroke-dasharray','6,5');
+      pln.setAttribute('stroke-linecap','round');pln.setAttribute('clip-path','url(#pc)');
+      g.appendChild(pln);
+    }
+
+    // peak dot
+    const pk=emp.frames.reduce((a,b)=>b.p>a.p?b:a);
+    const pdot=ns('circle');
+    pdot.setAttribute('cx',xS(pk.y));pdot.setAttribute('cy',yS(pk.p));
+    pdot.setAttribute('r','4');pdot.setAttribute('fill',emp.color);
+    pdot.setAttribute('stroke','#0d0a07');pdot.setAttribute('stroke-width','1.5');
+    g.appendChild(pdot);
+
+    // label
+    const lbl=ns('text');
+    lbl.setAttribute('x',xS(pk.y));lbl.setAttribute('y',yS(pk.p)-11);
+    lbl.setAttribute('text-anchor','middle');lbl.setAttribute('fill',emp.color);
+    lbl.setAttribute('font-family','Cinzel,serif');lbl.setAttribute('font-size','9');
+    lbl.setAttribute('font-weight','600');lbl.setAttribute('letter-spacing','0.07em');
+    lbl.setAttribute('opacity','0.88');
+    lbl.textContent=emp.name.toUpperCase();
+    g.appendChild(lbl);
+
+    // hit area
+    const hit=ns('path');
+    hit.setAttribute('d',hD);hit.setAttribute('fill','none');
+    hit.setAttribute('stroke','transparent');hit.setAttribute('stroke-width','18');
+    g.appendChild(hit);
+
+    // events
+    g.addEventListener('mouseenter',()=>{
+      ln.setAttribute('stroke-width','3.6');ln.setAttribute('stroke-opacity','1');
+      gw.setAttribute('stroke-opacity','0.24');gw.setAttribute('stroke-width','12');
+      if(pln){pln.setAttribute('stroke-width','3');pln.setAttribute('stroke-opacity','0.85');}
+      lbl.setAttribute('font-size','10.2');
+      document.getElementById('tt-name').textContent=emp.name;
+      document.getElementById('tt-desc').textContent=emp.desc;
+      const s=emp.frames[0].y;
+      const e=(emp.projected?emp.projected[emp.projected.length-1]:emp.frames[emp.frames.length-1]).y;
+      const fmt=y=>y<0?`${Math.abs(y)} BCE`:`${y} CE`;
+      document.getElementById('tt-dates').textContent=`${fmt(s)} – ${fmt(e)}`;
+      document.getElementById('tt-proj').style.display=emp.projected?'block':'none';
+      ttEl.classList.add('visible');
+    });
+    g.addEventListener('mousemove',e=>{
+      ttEl.style.left=(e.clientX+16)+'px'; ttEl.style.top=(e.clientY-10)+'px';
+    });
+    g.addEventListener('mouseleave',()=>{
+      ln.setAttribute('stroke-width','2.2');ln.setAttribute('stroke-opacity','0.88');
+      gw.setAttribute('stroke-opacity','0.09');gw.setAttribute('stroke-width','8');
+      if(pln){pln.setAttribute('stroke-width','2');pln.setAttribute('stroke-opacity','0.65');}
+      lbl.setAttribute('font-size','9');
+      ttEl.classList.remove('visible');
+    });
+
+    svgEl.appendChild(g);
+    empireGroups.push({emp,g,ln,gw,pln,lbl,idx});
+  });
+
+  // reapply hidden
+  empireGroups.forEach(({g,idx})=>{ g.style.opacity=hiddenSet.has(idx)?'0.07':'1'; });
+}
+
+// ─── ZOOM / PAN ───────────────────────────────────────────────────────────────
+function applyZoom(){
+  panX=clampPan(panX);
+  outerEl.scrollLeft=panX;
+  build();
+  document.getElementById('zoom-level').textContent=zoom.toFixed(1)+'×';
+  document.getElementById('zoom-slider').value=zoom;
+}
+
+function zoomAt(nz, focalClientX){
+  nz=Math.max(MIN_ZOOM,Math.min(MAX_ZOOM,nz));
+  const rect=outerEl.getBoundingClientRect();
+  const focusAbs=(focalClientX!==undefined?focalClientX-rect.left:outerW()/2)+panX;
+  const frac=(focusAbs-PAD.left)/Math.max(1,canvasW()-PAD.left-PAD.right);
+  zoom=nz;
+  const newAbs=frac*(canvasW()-PAD.left-PAD.right)+PAD.left;
+  panX=clampPan(newAbs-(focalClientX!==undefined?focalClientX-outerEl.getBoundingClientRect().left:outerW()/2));
+  applyZoom();
+}
+
+outerEl.addEventListener('wheel',e=>{
+  e.preventDefault();
+  zoomAt(zoom*(e.deltaY<0?1.13:1/1.13),e.clientX);
+},{passive:false});
+
+let drag=false,dsx=0,dsp=0;
+outerEl.addEventListener('mousedown',e=>{drag=true;dsx=e.clientX;dsp=panX;});
+window.addEventListener('mousemove',e=>{if(!drag)return;panX=clampPan(dsp-(e.clientX-dsx));outerEl.scrollLeft=panX;});
+window.addEventListener('mouseup',()=>{drag=false;});
+
+let tsx=0,tsp=0;
+outerEl.addEventListener('touchstart',e=>{tsx=e.touches[0].clientX;tsp=panX;},{passive:true});
+outerEl.addEventListener('touchmove',e=>{panX=clampPan(tsp-(e.touches[0].clientX-tsx));outerEl.scrollLeft=panX;},{passive:true});
+
+document.getElementById('zoom-in').addEventListener('click',()=>zoomAt(zoom*1.5));
+document.getElementById('zoom-out').addEventListener('click',()=>zoomAt(zoom/1.5));
+document.getElementById('zoom-reset').addEventListener('click',()=>{zoom=1;panX=0;applyZoom();});
+document.getElementById('zoom-slider').addEventListener('input',e=>zoomAt(parseFloat(e.target.value)));
+
+// ─── LEGEND ──────────────────────────────────────────────────────────────────
+const legEl=document.getElementById('legend');
+empires.forEach((emp,i)=>{
+  const item=document.createElement('div');
+  item.className='legend-item';
+  const sw = emp.projected
+    ? `<div style="width:22px;height:0;border-top:2px dashed ${emp.color};flex-shrink:0;margin-top:1px;"></div>`
+    : `<div style="width:22px;height:3px;background:${emp.color};border-radius:2px;flex-shrink:0;"></div>`;
+  item.innerHTML=sw+emp.name+(emp.isNew?`<span style="color:#f97316;margin-left:4px;font-size:.6rem;letter-spacing:.05em;">NEW</span>`:'');
+  item.addEventListener('click',()=>{
+    if(hiddenSet.has(i)){hiddenSet.delete(i);item.style.opacity='1';}
+    else{hiddenSet.add(i);item.style.opacity='0.3';}
+    empireGroups.forEach(({g,idx})=>{ g.style.opacity=hiddenSet.has(idx)?'0.07':'1'; });
+  });
+  legEl.appendChild(item);
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+build();
+window.addEventListener('resize',()=>{panX=clampPan(panX);build();});
+</script>
+</body>
+</html>
