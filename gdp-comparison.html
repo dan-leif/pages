@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>US · EU · China · India: Economic Trajectories</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #060e1c; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+    const {
+      ComposedChart,
+      Line,
+      XAxis,
+      YAxis,
+      CartesianGrid,
+      Tooltip,
+      Legend,
+      ReferenceLine,
+      ResponsiveContainer,
+    } = Recharts;
+
+    // ── COLORS ────────────────────────────────────────────────────────────────────
+    const US_COLOR = "#3b82f6";   // blue
+    const CN_COLOR = "#ef4444";   // red
+    const IN_COLOR = "#f59e0b";   // amber
+    const EU_COLOR = "#22c55e";   // green
+
+    // ── GDP DATA (nominal, trillions USD) ─────────────────────────────────────────
+    const gdpData = [
+      { year: 1990, us: 5.96,  cn: 0.36,  in: 0.32,  eu: 8.7  },
+      { year: 1992, us: 6.52,  cn: 0.49,  in: 0.29,  eu: 8.4  },
+      { year: 1994, us: 7.31,  cn: 0.56,  in: 0.33,  eu: 9.0  },
+      { year: 1996, us: 7.99,  cn: 0.86,  in: 0.40,  eu: 9.5  },
+      { year: 1998, us: 8.79,  cn: 1.03,  in: 0.43,  eu: 9.8  },
+      { year: 2000, us: 10.25, cn: 1.21,  in: 0.48,  eu: 9.1  },
+      { year: 2002, us: 10.64, cn: 1.47,  in: 0.52,  eu: 10.5 },
+      { year: 2004, us: 11.85, cn: 1.96,  in: 0.69,  eu: 13.4 },
+      { year: 2006, us: 13.81, cn: 2.75,  in: 0.94,  eu: 15.5 },
+      { year: 2008, us: 14.72, cn: 4.60,  in: 1.22,  eu: 18.4 },
+      { year: 2010, us: 14.96, cn: 6.09,  in: 1.68,  eu: 16.3 },
+      { year: 2012, us: 16.25, cn: 8.56,  in: 1.83,  eu: 16.7 },
+      { year: 2014, us: 17.43, cn: 10.48, in: 2.04,  eu: 18.6 },
+      { year: 2016, us: 18.71, cn: 11.23, in: 2.29,  eu: 16.4 },
+      { year: 2018, us: 20.66, cn: 13.89, in: 2.71,  eu: 18.8 },
+      { year: 2020, us: 21.06, cn: 14.69, in: 2.67,  eu: 15.2 },
+      { year: 2022, us: 25.44, cn: 17.96, in: 3.39,  eu: 16.6 },
+      { year: 2024, us: 28.78, cn: 18.74, in: 3.91,  eu: 19.4 },
+      { year: 2026, us: 30.3,  cn: 20.3,  in: 4.7,   eu: 20.0, proj: true },
+      { year: 2028, us: 31.8,  cn: 21.9,  in: 5.4,   eu: 20.6, proj: true },
+      { year: 2030, us: 33.4,  cn: 23.6,  in: 6.3,   eu: 21.2, proj: true },
+      { year: 2032, us: 35.1,  cn: 25.5,  in: 7.3,   eu: 21.9, proj: true },
+      { year: 2034, us: 36.8,  cn: 27.5,  in: 8.5,   eu: 22.5, proj: true },
+      { year: 2036, us: 38.7,  cn: 29.7,  in: 9.8,   eu: 23.2, proj: true },
+      { year: 2038, us: 40.6,  cn: 32.1,  in: 11.4,  eu: 23.9, proj: true },
+      { year: 2040, us: 42.6,  cn: 34.7,  in: 13.2,  eu: 24.6, proj: true },
+      { year: 2042, us: 44.8,  cn: 37.4,  in: 15.3,  eu: 25.4, proj: true },
+      { year: 2044, us: 47.0,  cn: 40.4,  in: 17.7,  eu: 26.1, proj: true },
+      { year: 2046, us: 49.4,  cn: 43.7,  in: 20.5,  eu: 26.9, proj: true },
+      { year: 2048, us: 51.9,  cn: 47.1,  in: 23.7,  eu: 27.7, proj: true },
+      { year: 2050, us: 54.5,  cn: 50.9,  in: 27.4,  eu: 28.6, proj: true },
+      { year: 2052, us: 57.2,  cn: 55.0,  in: 31.6,  eu: 29.4, proj: true },
+      { year: 2054, us: 60.1,  cn: 59.4,  in: 36.3,  eu: 30.3, proj: true },
+      { year: 2056, us: 63.1,  cn: 64.1,  in: 41.5,  eu: 31.2, proj: true },
+      { year: 2058, us: 66.3,  cn: 68.2,  in: 47.2,  eu: 32.2, proj: true },
+      { year: 2060, us: 69.6,  cn: 72.5,  in: 53.5,  eu: 33.1, proj: true },
+      { year: 2062, us: 73.1,  cn: 76.7,  in: 59.9,  eu: 34.1, proj: true },
+      { year: 2064, us: 76.8,  cn: 81.1,  in: 66.7,  eu: 35.2, proj: true },
+      { year: 2066, us: 80.7,  cn: 85.8,  in: 73.7,  eu: 36.2, proj: true },
+      { year: 2068, us: 84.8,  cn: 90.7,  in: 80.9,  eu: 37.3, proj: true },
+      { year: 2070, us: 89.1,  cn: 95.8,  in: 88.1,  eu: 38.4, proj: true },
+      { year: 2072, us: 93.6,  cn: 101.2, in: 95.4,  eu: 39.6, proj: true },
+      { year: 2074, us: 98.3,  cn: 106.8, in: 103.0, eu: 40.8, proj: true },
+      { year: 2076, us: 103.3, cn: 112.6, in: 110.8, eu: 42.0, proj: true },
+      { year: 2078, us: 108.5, cn: 118.8, in: 118.8, eu: 43.2, proj: true },
+      { year: 2080, us: 113.9, cn: 125.3, in: 127.1, eu: 44.5, proj: true },
+      { year: 2082, us: 119.7, cn: 132.1, in: 135.6, eu: 45.8, proj: true },
+      { year: 2084, us: 125.7, cn: 139.3, in: 144.4, eu: 47.2, proj: true },
+      { year: 2086, us: 132.0, cn: 146.9, in: 153.5, eu: 48.6, proj: true },
+      { year: 2088, us: 138.7, cn: 154.8, in: 162.9, eu: 50.1, proj: true },
+      { year: 2090, us: 145.7, cn: 163.1, in: 172.6, eu: 51.6, proj: true },
+      { year: 2092, us: 153.0, cn: 172.0, in: 182.6, eu: 53.1, proj: true },
+      { year: 2094, us: 160.7, cn: 181.2, in: 193.1, eu: 54.7, proj: true },
+      { year: 2096, us: 168.8, cn: 191.0, in: 204.0, eu: 56.4, proj: true },
+      { year: 2098, us: 177.3, cn: 201.3, in: 215.4, eu: 58.1, proj: true },
+      { year: 2100, us: 186.2, cn: 212.2, in: 227.3, eu: 59.8, proj: true },
+    ];
+
+    // ── GDP PER CAPITA PPP (thousands USD) ────────────────────────────────────────
+    const perCapitaData = [
+      { year: 1990, us: 23.2, cn: 1.5,  in: 1.1,  eu: 17.5 },
+      { year: 1992, us: 25.0, cn: 1.8,  in: 1.3,  eu: 18.5 },
+      { year: 1994, us: 27.0, cn: 2.2,  in: 1.5,  eu: 19.5 },
+      { year: 1996, us: 29.6, cn: 2.8,  in: 1.7,  eu: 21.0 },
+      { year: 1998, us: 32.6, cn: 3.3,  in: 1.9,  eu: 22.5 },
+      { year: 2000, us: 36.3, cn: 4.1,  in: 2.2,  eu: 24.5 },
+      { year: 2002, us: 38.0, cn: 5.0,  in: 2.6,  eu: 26.0 },
+      { year: 2004, us: 41.5, cn: 6.4,  in: 3.1,  eu: 28.5 },
+      { year: 2006, us: 45.8, cn: 8.1,  in: 3.7,  eu: 32.0 },
+      { year: 2008, us: 48.5, cn: 10.2, in: 4.4,  eu: 34.5 },
+      { year: 2010, us: 49.3, cn: 12.4, in: 5.2,  eu: 33.0 },
+      { year: 2012, us: 52.1, cn: 14.9, in: 6.0,  eu: 34.0 },
+      { year: 2014, us: 55.2, cn: 17.4, in: 6.8,  eu: 36.5 },
+      { year: 2016, us: 57.9, cn: 19.3, in: 7.6,  eu: 38.5 },
+      { year: 2018, us: 62.9, cn: 21.8, in: 8.5,  eu: 43.0 },
+      { year: 2020, us: 63.5, cn: 22.4, in: 8.9,  eu: 41.0 },
+      { year: 2022, us: 76.4, cn: 22.9, in: 9.2,  eu: 48.0 },
+      { year: 2024, us: 85.4, cn: 23.8, in: 9.8,  eu: 62.4 },
+      { year: 2026, us: 88.8, cn: 25.7, in: 11.1, eu: 64.5, proj: true },
+      { year: 2028, us: 92.4, cn: 27.8, in: 12.7, eu: 66.6, proj: true },
+      { year: 2030, us: 96.0, cn: 30.0, in: 14.4, eu: 68.8, proj: true },
+      { year: 2035, us: 106,  cn: 36.5, in: 19.5, eu: 74.5, proj: true },
+      { year: 2040, us: 117,  cn: 44.4, in: 26.3, eu: 80.5, proj: true },
+      { year: 2045, us: 129,  cn: 53.7, in: 35.0, eu: 87.0, proj: true },
+      { year: 2050, us: 143,  cn: 65.0, in: 46.0, eu: 94.0, proj: true },
+      { year: 2055, us: 158,  cn: 77.5, in: 59.0, eu: 101,  proj: true },
+      { year: 2060, us: 174,  cn: 91.0, in: 74.0, eu: 109,  proj: true },
+      { year: 2065, us: 192,  cn: 106,  in: 91.0, eu: 118,  proj: true },
+      { year: 2070, us: 212,  cn: 121,  in: 109,  eu: 127,  proj: true },
+      { year: 2075, us: 234,  cn: 137,  in: 129,  eu: 137,  proj: true },
+      { year: 2080, us: 258,  cn: 154,  in: 151,  eu: 148,  proj: true },
+      { year: 2085, us: 285,  cn: 172,  in: 174,  eu: 160,  proj: true },
+      { year: 2090, us: 315,  cn: 192,  in: 199,  eu: 172,  proj: true },
+      { year: 2095, us: 347,  cn: 213,  in: 226,  eu: 186,  proj: true },
+      { year: 2100, us: 383,  cn: 235,  in: 255,  eu: 201,  proj: true },
+    ];
+
+    const FMT    = (v) => v >= 1 ? `$${v.toFixed(1)}T` : `$${(v * 1000).toFixed(0)}B`;
+    const FMT_PC = (v) => `$${Math.round(v)}k`;
+
+    // ── TOOLTIP ─────────────────────────────────────────────────────────────────
+    function SharedTooltip({ active, payload, label, fmt }) {
+      if (!active || !payload?.length) return null;
+      const isProj = payload[0]?.payload?.proj;
+      return (
+        <div style={{
+          background: "#0f172a", border: "1px solid #334155",
+          borderRadius: 8, padding: "10px 14px", fontSize: 12, color: "#e2e8f0",
+        }}>
+          <p style={{ fontWeight: 700, marginBottom: 5, color: "#94a3b8" }}>
+            {label}{isProj ? " ·proj" : ""}
+          </p>
+          {payload.filter(p => p.value != null).map((p) => (
+            <p key={p.name} style={{ color: p.color, margin: "2px 0" }}>
+              {p.name}: <strong>{fmt(p.value)}</strong>
+            </p>
+          ))}
+        </div>
+      );
+    }
+
+    // ── CARD ─────────────────────────────────────────────────────────────────────
+    function ChartCard({ title, subtitle, children }) {
+      return (
+        <div style={{
+          background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+          border: "1px solid #1e3a5f", borderRadius: 16,
+          padding: "24px 18px 18px", marginBottom: 24,
+        }}>
+          <h2 style={{ margin: "0 0 3px", fontSize: 16, fontWeight: 800, color: "#f1f5f9",
+            letterSpacing: "-0.02em", fontFamily: "'Georgia', serif" }}>{title}</h2>
+          <p style={{ margin: "0 0 16px", fontSize: 12, color: "#64748b" }}>{subtitle}</p>
+          {children}
+        </div>
+      );
+    }
+
+    function Stat({ label, value, color }) {
+      return (
+        <div style={{ background: "#0f172a", border: `1px solid ${color}33`,
+          borderRadius: 9, padding: "8px 12px", flex: 1, minWidth: 100 }}>
+          <div style={{ fontSize: 10, color: "#64748b", marginBottom: 2 }}>{label}</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color }}>{value}</div>
+        </div>
+      );
+    }
+
+    // ── MAIN ─────────────────────────────────────────────────────────────────────
+    function App() {
+      const [tab, setTab] = useState("gdp");
+
+      const tabs = [
+        { key: "gdp", label: "📊 Nominal GDP" },
+        { key: "pc",  label: "👤 GDP per Capita PPP" },
+      ];
+
+      return (
+        <div style={{
+          minHeight: "100vh", background: "#060e1c", color: "#e2e8f0",
+          fontFamily: "'Trebuchet MS', 'Lucida Grande', sans-serif",
+          padding: "20px 16px 36px", maxWidth: 820, margin: "0 auto",
+        }}>
+          {/* Header */}
+          <div style={{ textAlign: "center", marginBottom: 22 }}>
+            <h1 style={{
+              fontSize: 22, fontWeight: 900, letterSpacing: "-0.03em", margin: "0 0 4px",
+              fontFamily: "'Georgia', serif",
+              background: "linear-gradient(90deg, #3b82f6, #22c55e, #ef4444, #f59e0b)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+            }}>
+              US · EU · China · India: Economic Trajectories
+            </h1>
+            <p style={{ color: "#64748b", fontSize: 12, margin: 0 }}>
+              1990–2024 historical &nbsp;·&nbsp; 2025–2100 projected (moderate scenario)
+            </p>
+          </div>
+
+          {/* Tabs */}
+          <div style={{ display: "flex", gap: 6, marginBottom: 20,
+            background: "#0f172a", borderRadius: 11, padding: 4, border: "1px solid #1e293b" }}>
+            {tabs.map(({ key, label }) => (
+              <button key={key} onClick={() => setTab(key)} style={{
+                flex: 1, padding: "9px 6px", borderRadius: 8, border: "none", cursor: "pointer",
+                fontSize: 12, fontWeight: 600, transition: "all 0.2s",
+                background: tab === key ? "#1e3a5f" : "transparent",
+                color: tab === key ? "#93c5fd" : "#64748b",
+              }}>{label}</button>
+            ))}
+          </div>
+
+          {/* ── CHART 1: NOMINAL GDP ── */}
+          {tab === "gdp" && (
+            <ChartCard
+              title="Nominal GDP — Total Economic Size"
+              subtitle="Current USD trillions. Solid = historical · dashed region = projection."
+            >
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+                <Stat label="US 2024"    value="$28.8T" color={US_COLOR} />
+                <Stat label="EU 2024"    value="$19.4T" color={EU_COLOR} />
+                <Stat label="China 2024" value="$18.7T" color={CN_COLOR} />
+                <Stat label="India 2024" value="$3.9T"  color={IN_COLOR} />
+                <Stat label="CN>US ~2050" value="IN>US ~2080" color="#a78bfa"  />
+              </div>
+
+              <ResponsiveContainer width="100%" height={370}>
+                <ComposedChart data={gdpData} margin={{ top: 8, right: 12, left: 4, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                  <XAxis dataKey="year" tick={{ fill: "#64748b", fontSize: 11 }} tickLine={false}
+                    axisLine={{ stroke: "#1e293b" }} ticks={[1990,2000,2010,2020,2030,2040,2050,2060,2070,2080,2090,2100]} />
+                  <YAxis tickFormatter={(v) => `$${v}T`} tick={{ fill: "#64748b", fontSize: 10 }}
+                    tickLine={false} axisLine={false} width={50} />
+                  <Tooltip content={<SharedTooltip fmt={FMT} />} />
+                  <Legend wrapperStyle={{ fontSize: 12, color: "#94a3b8", paddingTop: 8 }} />
+
+                  <ReferenceLine x={2024} stroke="#334155" strokeDasharray="4 3"
+                    label={{ value: "now", position: "insideTopLeft", fill: "#475569", fontSize: 10 }} />
+                  <ReferenceLine x={2050} stroke="#a78bfa55" strokeDasharray="4 3"
+                    label={{ value: "CN>US ~2050", position: "insideTopRight", fill: "#a78bfa", fontSize: 10 }} />
+                  <ReferenceLine x={2080} stroke="#f59e0b55" strokeDasharray="4 3"
+                    label={{ value: "IN>US ~2080", position: "insideTopRight", fill: "#f59e0b", fontSize: 10 }} />
+
+                  <Line dataKey="us" name="United States" stroke={US_COLOR} strokeWidth={2.5}
+                    dot={false} activeDot={{ r: 4 }} connectNulls />
+                  <Line dataKey="eu" name="European Union" stroke={EU_COLOR} strokeWidth={2.5}
+                    dot={false} activeDot={{ r: 4 }} connectNulls />
+                  <Line dataKey="cn" name="China" stroke={CN_COLOR} strokeWidth={2.5}
+                    dot={false} activeDot={{ r: 4 }} connectNulls />
+                  <Line dataKey="in" name="India" stroke={IN_COLOR} strokeWidth={2.5}
+                    dot={false} activeDot={{ r: 4 }} connectNulls />
+                </ComposedChart>
+              </ResponsiveContainer>
+
+              <div style={{ marginTop: 14, padding: "11px 13px", background: "#0a1628",
+                borderRadius: 9, fontSize: 11, color: "#64748b", lineHeight: 1.65 }}>
+                <strong style={{ color: "#94a3b8" }}>Projection assumptions:</strong>{" "}
+                US ~2.5% nominal/yr. EU ~1.5%/yr (aging population, slower productivity growth — the EU peaked vs. the US around 2008 and has struggled to keep pace since).
+                China ~4% net nominal USD, slowing to ~2.5% post-2060 (demographics, debt).
+                India ~7% nominal, slowing to ~4.5% by 2060 and ~3% by 2080 (demographic dividend then plateau).
+                India surpasses the US in total GDP around <strong style={{color:"#f59e0b"}}>~2080</strong>.
+                The EU is the great <em>decliner</em> of the century — large today but gradually overtaken by all three Asian powers.
+              </div>
+            </ChartCard>
+          )}
+
+          {/* ── CHART 2: GDP PER CAPITA PPP ── */}
+          {tab === "pc" && (
+            <ChartCard
+              title="GDP per Capita (PPP) — Average Living Standard"
+              subtitle="Purchasing power parity, thousands of international dollars. No crossover projected this century."
+            >
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+                <Stat label="US 2024"    value="$85k"  color={US_COLOR} />
+                <Stat label="EU 2024"    value="$62k"  color={EU_COLOR} />
+                <Stat label="China 2024" value="$24k"  color={CN_COLOR} />
+                <Stat label="India 2024" value="$10k"  color={IN_COLOR} />
+                <Stat label="Crossover?" value="Not this century" color="#f59e0b" />
+              </div>
+
+              <ResponsiveContainer width="100%" height={370}>
+                <ComposedChart data={perCapitaData} margin={{ top: 8, right: 12, left: 4, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                  <XAxis dataKey="year" tick={{ fill: "#64748b", fontSize: 11 }} tickLine={false}
+                    axisLine={{ stroke: "#1e293b" }} ticks={[1990,2000,2010,2020,2030,2040,2050,2060,2070,2080,2090,2100]} />
+                  <YAxis tickFormatter={(v) => `$${v}k`} tick={{ fill: "#64748b", fontSize: 10 }}
+                    tickLine={false} axisLine={false} width={54} />
+                  <Tooltip content={<SharedTooltip fmt={FMT_PC} />} />
+                  <Legend wrapperStyle={{ fontSize: 12, color: "#94a3b8", paddingTop: 8 }} />
+
+                  <ReferenceLine x={2024} stroke="#334155" strokeDasharray="4 3"
+                    label={{ value: "now", position: "insideTopLeft", fill: "#475569", fontSize: 10 }} />
+
+                  <Line dataKey="us" name="United States" stroke={US_COLOR} strokeWidth={2.5}
+                    dot={false} activeDot={{ r: 4 }} connectNulls />
+                  <Line dataKey="eu" name="European Union" stroke={EU_COLOR} strokeWidth={2.5}
+                    dot={false} activeDot={{ r: 4 }} connectNulls />
+                  <Line dataKey="cn" name="China" stroke={CN_COLOR} strokeWidth={2.5}
+                    dot={false} activeDot={{ r: 4 }} connectNulls />
+                  <Line dataKey="in" name="India" stroke={IN_COLOR} strokeWidth={2.5}
+                    dot={false} activeDot={{ r: 4 }} connectNulls />
+                </ComposedChart>
+              </ResponsiveContainer>
+
+              <div style={{ marginTop: 14, padding: "11px 13px", background: "#0a1628",
+                borderRadius: 9, fontSize: 11, color: "#64748b", lineHeight: 1.65 }}>
+                <strong style={{ color: "#94a3b8" }}>The EU occupies a revealing middle position.</strong>{" "}
+                At ~$62k PPP today, the EU is well ahead of China and India but about 27% below the US — a gap that persists all century under moderate growth (~1.5%/yr).
+                The EU's per capita line tracks roughly parallel to the US, never converging, because both are mature economies growing at similar rates.
+                China and India close the gap slowly but don't catch the EU until very late in the century.{" "}
+                <strong style={{ color: "#f59e0b" }}>
+                  No challenger reaches US per-capita levels this century under moderate assumptions.
+                </strong>{" "}
+                Productivity breakthroughs — especially from AI — could compress these timelines dramatically.
+              </div>
+            </ChartCard>
+          )}
+
+          <p style={{ textAlign: "center", fontSize: 10, color: "#334155", marginTop: 4 }}>
+            Sources: World Bank, IMF WEO, BEA, EY India 2050 Report · 75-year projections carry wide uncertainty bands — treat as illustrative scenarios.
+          </p>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

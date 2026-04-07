@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Empires & Economies</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: #0a0a0f;
+      color: #e2e0d8;
+      font-family: 'Trebuchet MS', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: clamp(24px, 5vw, 42px);
+      font-weight: 700;
+      color: #c9a84c;
+      letter-spacing: 0.05em;
+      text-align: center;
+      margin-bottom: 10px;
+      text-shadow: 0 0 40px rgba(201,168,76,0.3);
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #6b6755;
+      text-align: center;
+      margin-bottom: 52px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .cards {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 800px;
+      width: 100%;
+    }
+    a.card {
+      display: block;
+      text-decoration: none;
+      background: linear-gradient(145deg, #12100e, #1c1a15);
+      border: 1px solid #3a3020;
+      border-radius: 16px;
+      padding: 32px 28px;
+      flex: 1;
+      min-width: 260px;
+      max-width: 360px;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    a.card:hover {
+      border-color: #c9a84c;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(201,168,76,0.12);
+    }
+    .card-icon {
+      font-size: 36px;
+      margin-bottom: 14px;
+    }
+    .card-title {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: #c9a84c;
+      margin-bottom: 8px;
+    }
+    .card-desc {
+      font-size: 13px;
+      color: #8a8070;
+      line-height: 1.6;
+    }
+    .card-span {
+      display: inline-block;
+      margin-top: 16px;
+      font-size: 11px;
+      color: #4a4535;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    footer {
+      margin-top: 60px;
+      font-size: 11px;
+      color: #3a3525;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Empires &amp; Economies</h1>
+  <p class="subtitle">Interactive historical &amp; economic visualizations</p>
+
+  <div class="cards">
+    <a class="card" href="world-powers.html">
+      <div class="card-icon">🏛️</div>
+      <div class="card-title">Rise &amp; Fall of World Powers</div>
+      <div class="card-desc">
+        3000 BCE to 2125 CE — the arc of 15+ civilizations charted across time.
+        Zoom, pan, and explore the relative dominance of empires from Egypt to the present day.
+      </div>
+      <span class="card-span">3000 BCE – 2125 CE &rarr;</span>
+    </a>
+
+    <a class="card" href="gdp-comparison.html">
+      <div class="card-icon">📈</div>
+      <div class="card-title">Economic Trajectories</div>
+      <div class="card-desc">
+        US, EU, China, and India from 1990 to 2100 — nominal GDP and GDP per capita PPP,
+        with historical data through 2024 and moderate-scenario projections to century's end.
+      </div>
+      <span class="card-span">1990 – 2100 &rarr;</span>
+    </a>
+  </div>
+
+  <footer>Sources: World Bank · IMF · BEA · historical scholarship</footer>
+</body>
+</html>
