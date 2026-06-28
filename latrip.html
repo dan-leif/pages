@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LA Trip — Dan's Itinerary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a1a;
+    --mist: #f0ede8;
+    --gold: #c8963e;
+    --slate: #5a6472;
+    --rule: #d4cfc9;
+    --white: #ffffff;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--mist);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  header {
+    background: var(--ink);
+    color: var(--white);
+    padding: 2.5rem 2rem 2rem;
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    line-height: 1.1;
+    font-weight: 400;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .subtitle {
+    margin-top: 0.6rem;
+    color: #aaa;
+    font-size: 13px;
+    font-weight: 300;
+  }
+
+  #map {
+    width: 100%;
+    height: 420px;
+    border-top: 3px solid var(--gold);
+    display: block;
+  }
+
+  .map-link-bar {
+    background: var(--ink);
+    text-align: center;
+    padding: 0.5rem;
+  }
+
+  .map-link-bar a {
+    color: var(--gold);
+    font-size: 12px;
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .days {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  .day-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    margin-top: 2.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .day-label {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    font-weight: 400;
+  }
+
+  .day-date {
+    font-size: 12px;
+    color: var(--slate);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .stops {
+    list-style: none;
+    position: relative;
+    padding-left: 2rem;
+  }
+
+  .stops::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: var(--rule);
+  }
+
+  .stop {
+    position: relative;
+    padding: 0 0 1.8rem 1.2rem;
+  }
+
+  .stop::before {
+    content: '';
+    position: absolute;
+    left: -1.55rem;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: 2px solid var(--mist);
+    box-shadow: 0 0 0 2px var(--gold);
+  }
+
+  .stop.hotel::before { background: var(--slate); box-shadow: 0 0 0 2px var(--slate); }
+  .stop.drive::before { background: var(--mist); border-color: var(--slate); box-shadow: 0 0 0 2px var(--slate); }
+
+  .stop-time {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 0.15rem;
+  }
+
+  .stop-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    margin-bottom: 0.2rem;
+  }
+
+  .stop-addr {
+    font-size: 12px;
+    color: var(--slate);
+    margin-bottom: 0.4rem;
+  }
+
+  .stop-note {
+    font-size: 13.5px;
+    color: #444;
+    line-height: 1.55;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 3px;
+    margin-bottom: 0.4rem;
+    background: #e8e4de;
+    color: var(--slate);
+  }
+
+  .tag.consulate { background: #fdf0db; color: #8a6020; }
+  .tag.food { background: #e8f0e8; color: #3a6040; }
+  .tag.sightseeing { background: #e0e8f0; color: #304860; }
+
+  .directions-btn {
+    display: inline-block;
+    margin-top: 0.6rem;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gold);
+    text-decoration: none;
+    border: 1px solid var(--gold);
+    padding: 3px 10px;
+    border-radius: 3px;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .directions-btn:hover { background: var(--gold); color: var(--white); }
+
+  .consulate-checklist {
+    margin-top: 0.6rem;
+    padding: 0.8rem 1rem;
+    background: #fdf8f0;
+    border-left: 3px solid var(--gold);
+    border-radius: 0 4px 4px 0;
+  }
+
+  .consulate-checklist p {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    margin-bottom: 0.4rem;
+  }
+
+  .consulate-checklist ul {
+    list-style: none;
+    font-size: 13px;
+    color: #555;
+  }
+
+  .consulate-checklist ul li::before {
+    content: '✓ ';
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 12px;
+    color: #aaa;
+    border-top: 1px solid var(--rule);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">SLO → Los Angeles → SLO</div>
+  <h1>Dan's <em>LA</em> Itinerary</h1>
+  <div class="subtitle">June 29–30, 2026 &nbsp;·&nbsp; Chinese Consulate + City</div>
+</header>
+
+<iframe id="map"
+  src="https://www.google.com/maps/embed/v1/directions?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&origin=W+8th+St+%26+S+Ardmore+Ave,+Los+Angeles,+CA+90005&destination=2800+E+Observatory+Rd,+Los+Angeles,+CA+90027&waypoints=500+Shatto+Pl,+Los+Angeles,+CA+90020|1001+N+Alameda+St,+Los+Angeles,+CA+90012|Hollywood+Blvd+%26+Vine+St,+Los+Angeles,+CA+90028&mode=driving"
+  allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" style="border:0">
+</iframe>
+<div class="map-link-bar">
+  <a href="https://www.google.com/maps/dir/W+8th+St+%26+S+Ardmore+Ave,+Los+Angeles,+CA+90005/500+Shatto+Pl+FL+3,+Los+Angeles,+CA+90020/1001+N+Alameda+St,+Los+Angeles,+CA+90012/Hollywood+Blvd+%26+Vine+St,+Los+Angeles,+CA+90028/2800+E+Observatory+Rd,+Los+Angeles,+CA+90027" target="_blank">↗ Open full route in Google Maps</a>
+</div>
+
+<div class="days">
+
+  <!-- MONDAY -->
+  <div class="day-header">
+    <span class="day-label">Monday</span>
+    <span class="day-date">June 29 — Arrival</span>
+  </div>
+
+  <ul class="stops">
+    <li class="stop hotel">
+      <div class="stop-time">~7:00 pm</div>
+      <div class="stop-name">Arrive — 8th &amp; Ardmore</div>
+      <div class="stop-addr">W 8th St &amp; S Ardmore Ave, Los Angeles, CA 90005</div>
+      <div class="stop-note">Koreatown neighborhood. Plenty of food options within walking distance if you're hungry tonight — Korean BBQ nearby is naturally wheat-friendly.</div>
+      <a class="directions-btn" href="https://maps.google.com/?q=W+8th+St+%26+S+Ardmore+Ave,+Los+Angeles,+CA+90005" target="_blank">Directions</a>
+    </li>
+  </ul>
+
+  <!-- TUESDAY -->
+  <div class="day-header">
+    <span class="day-label">Tuesday</span>
+    <span class="day-date">June 30 — Consulate + City</span>
+  </div>
+
+  <ul class="stops">
+
+    <li class="stop">
+      <div class="stop-time">8:45 am</div>
+      <span class="tag consulate">Consulate</span>
+      <div class="stop-name">Chinese Consulate General</div>
+      <div class="stop-addr">500 Shatto Pl, 3rd Floor, Los Angeles, CA 90020</div>
+      <div class="stop-note">Arrive before the 9am opening — lines form early. ~10 min drive from hotel. Street parking is ~$1.50/hr nearby.</div>
+      <div class="consulate-checklist">
+        <p>Bring</p>
+        <ul>
+          <li>Printed barcode from approved online application</li>
+          <li>Passport</li>
+          <li>Credit card (no cash accepted)</li>
+        </ul>
+      </div>
+      <a class="directions-btn" href="https://maps.google.com/?q=500+Shatto+Pl,+Los+Angeles,+CA+90020" target="_blank">Directions</a>
+    </li>
+
+    <li class="stop">
+      <div class="stop-time">~10:30 am</div>
+      <span class="tag food">Breakfast</span>
+      <div class="stop-name">Philippe The Original</div>
+      <div class="stop-addr">1001 N Alameda St, Los Angeles, CA 90012</div>
+      <div class="stop-note">LA institution since 1908. Famous French dip sandwiches, sawdust floors, old-school cafeteria counter. ~15 min drive from the consulate. Note: the dipped bread is wheat — go for the roasted meat, potato salad, hard-boiled eggs, or coleslaw. The vibe alone is worth the stop.</div>
+      <a class="directions-btn" href="https://maps.google.com/?q=1001+N+Alameda+St,+Los+Angeles,+CA+90012" target="_blank">Directions</a>
+    </li>
+
+    <li class="stop drive">
+      <div class="stop-time">~11:30 am</div>
+      <span class="tag sightseeing">Scenic Drive</span>
+      <div class="stop-name">Hollywood Blvd — Walk of Fame</div>
+      <div class="stop-addr">Hollywood Blvd &amp; Vine St, Los Angeles, CA 90028</div>
+      <div class="stop-note">Head northwest from Chinatown. A slow cruise or short walk along Hollywood Blvd past the Chinese Theatre and Walk of Fame stars. Free, takes 20–30 min, and it's distinctly LA. Then continue north on the 101 toward Griffith Park.</div>
+      <a class="directions-btn" href="https://maps.google.com/?q=Hollywood+Blvd+%26+Vine+St,+Los+Angeles,+CA+90028" target="_blank">Directions</a>
+    </li>
+
+    <li class="stop">
+      <div class="stop-time">~12:15 pm</div>
+      <span class="tag sightseeing">View</span>
+      <div class="stop-name">Griffith Observatory</div>
+      <div class="stop-addr">2800 E Observatory Rd, Los Angeles, CA 90027</div>
+      <div class="stop-note">Opens at noon on Tuesdays — perfect timing. Free admission and free parking. The views over the entire LA basin and up to the Hollywood Sign are spectacular. Give yourself 45–60 min. Head up Mount Hollywood Dr to the main parking lot; the lot fills up later in the day so noon arrival is ideal.</div>
+      <a class="directions-btn" href="https://maps.google.com/?q=2800+E+Observatory+Rd,+Los+Angeles,+CA+90027" target="_blank">Directions</a>
+    </li>
+
+    <li class="stop hotel">
+      <div class="stop-time">~1:30 pm</div>
+      <div class="stop-name">Head home to SLO</div>
+      <div class="stop-addr">US-101 North</div>
+      <div class="stop-note">From Griffith Park, take Los Feliz Blvd west to the 101 N. Arrive SLO around 4:30–5pm depending on traffic. Avoid leaving between 3–6pm if possible — that's peak LA freeway hour.</div>
+    </li>
+
+  </ul>
+
+</div>
+
+<footer>Built with Claude · June 2026</footer>
+
+
+
+</body>
+</html>
