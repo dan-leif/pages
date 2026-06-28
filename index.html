@@ -3,123 +3,232 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Empires & Economies</title>
+  <title>Dan's Pages</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117;
+      --bg-soft: #161b22;
+      --bg-card: #161b22;
+      --border: #21262d;
+      --border-hover: #3d8bfd;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --faint: #6e7681;
+      --accent: #58a6ff;
+    }
     body {
       min-height: 100vh;
-      background: #0a0a0f;
-      color: #e2e0d8;
-      font-family: 'Trebuchet MS', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
+      background: radial-gradient(1200px 600px at 50% -10%, #18212f 0%, var(--bg) 55%);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.5;
+      padding: 64px 20px 80px;
     }
+    .wrap { max-width: 920px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 56px; }
     h1 {
-      font-family: 'Cinzel', Georgia, serif;
-      font-size: clamp(24px, 5vw, 42px);
-      font-weight: 700;
-      color: #c9a84c;
-      letter-spacing: 0.05em;
-      text-align: center;
-      margin-bottom: 10px;
-      text-shadow: 0 0 40px rgba(201,168,76,0.3);
+      font-size: clamp(30px, 6vw, 46px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
     }
-    .subtitle {
-      font-size: 13px;
-      color: #6b6755;
-      text-align: center;
-      margin-bottom: 52px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+    header p {
+      color: var(--muted);
+      font-size: 16px;
+      max-width: 560px;
+      margin: 0 auto;
     }
-    .cards {
+    .section-label {
       display: flex;
-      gap: 24px;
-      flex-wrap: wrap;
-      justify-content: center;
-      max-width: 800px;
-      width: 100%;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--faint);
+      margin: 0 0 22px;
+    }
+    .section-label::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    section { margin-bottom: 56px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
     }
     a.card {
-      display: block;
+      display: flex;
+      flex-direction: column;
       text-decoration: none;
-      background: linear-gradient(145deg, #12100e, #1c1a15);
-      border: 1px solid #3a3020;
-      border-radius: 16px;
-      padding: 32px 28px;
-      flex: 1;
-      min-width: 260px;
-      max-width: 360px;
-      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 22px 20px;
+      transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
     }
     a.card:hover {
-      border-color: #c9a84c;
-      transform: translateY(-3px);
-      box-shadow: 0 12px 40px rgba(201,168,76,0.12);
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
     }
-    .card-icon {
-      font-size: 36px;
-      margin-bottom: 14px;
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
     }
+    .card-icon { font-size: 22px; line-height: 1; }
     .card-title {
-      font-family: 'Cinzel', Georgia, serif;
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 700;
-      color: #c9a84c;
-      margin-bottom: 8px;
+      color: var(--text);
     }
     .card-desc {
-      font-size: 13px;
-      color: #8a8070;
-      line-height: 1.6;
+      font-size: 13.5px;
+      color: var(--muted);
+      flex: 1;
     }
-    .card-span {
-      display: inline-block;
+    .card-meta {
       margin-top: 16px;
-      font-size: 11px;
-      color: #4a4535;
-      letter-spacing: 0.06em;
+      font-size: 11.5px;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
+      color: var(--faint);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(88,166,255,0.1);
+      border: 1px solid rgba(88,166,255,0.25);
+      border-radius: 999px;
+      padding: 2px 9px;
+      letter-spacing: 0;
+      text-transform: none;
     }
     footer {
-      margin-top: 60px;
-      font-size: 11px;
-      color: #3a3525;
       text-align: center;
+      margin-top: 24px;
+      font-size: 13px;
+      color: var(--faint);
     }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  <h1>Empires &amp; Economies</h1>
-  <p class="subtitle">Interactive historical &amp; economic visualizations</p>
+  <div class="wrap">
+    <header>
+      <h1>Dan's Pages</h1>
+      <p>A general spot for pages I build, use, and share — interactive visualizations, planners, and experiments. Plus a few of my other projects.</p>
+    </header>
 
-  <div class="cards">
-    <a class="card" href="world-powers.html">
-      <div class="card-icon">🏛️</div>
-      <div class="card-title">Rise &amp; Fall of World Powers</div>
-      <div class="card-desc">
-        3000 BCE to 2125 CE — the arc of 15+ civilizations charted across time.
-        Zoom, pan, and explore the relative dominance of empires from Egypt to the present day.
-      </div>
-      <span class="card-span">3000 BCE – 2125 CE &rarr;</span>
-    </a>
+    <section>
+      <h2 class="section-label">Pages in this repo</h2>
+      <div class="grid">
+        <a class="card" href="world-powers.html">
+          <div class="card-head">
+            <span class="card-icon">🏛️</span>
+            <span class="card-title">Rise &amp; Fall of World Powers</span>
+          </div>
+          <p class="card-desc">An interactive timeline charting the relative dominance of 15+ civilizations, from ancient Egypt to the present. Zoom and pan across five millennia of empires.</p>
+          <span class="card-meta">3000 BCE – 2125 CE</span>
+        </a>
 
-    <a class="card" href="gdp-comparison.html">
-      <div class="card-icon">📈</div>
-      <div class="card-title">Economic Trajectories</div>
-      <div class="card-desc">
-        US, EU, China, and India from 1990 to 2100 — nominal GDP and GDP per capita PPP,
-        with historical data through 2024 and moderate-scenario projections to century's end.
+        <a class="card" href="gdp-comparison.html">
+          <div class="card-head">
+            <span class="card-icon">📈</span>
+            <span class="card-title">Economic Trajectories</span>
+          </div>
+          <p class="card-desc">US, EU, China, and India compared on nominal GDP and GDP per capita (PPP) — historical data through 2024 with projections out to the end of the century.</p>
+          <span class="card-meta">1990 – 2100</span>
+        </a>
+
+        <a class="card" href="latrip.html">
+          <div class="card-head">
+            <span class="card-icon">🌴</span>
+            <span class="card-title">LA Trip Itinerary</span>
+          </div>
+          <p class="card-desc">A day-by-day itinerary for a trip to Los Angeles — places to eat, things to see, and a map of where it all is.</p>
+          <span class="card-meta">Travel planner</span>
+        </a>
+
+        <a class="card" href="pickleball-calendar.html">
+          <div class="card-head">
+            <span class="card-icon">🎾</span>
+            <span class="card-title">Pickleball Calendar</span>
+          </div>
+          <p class="card-desc">A mobile-friendly calendar of pickleball sessions, laid out across June and July so it's easy to see what's coming up at a glance.</p>
+          <span class="card-meta">Jun – Jul 2026</span>
+        </a>
       </div>
-      <span class="card-span">1990 – 2100 &rarr;</span>
-    </a>
+    </section>
+
+    <section>
+      <h2 class="section-label">My other projects</h2>
+      <div class="grid">
+        <a class="card" href="https://github.com/dan-leif/shanka">
+          <div class="card-head">
+            <span class="card-icon">🀄</span>
+            <span class="card-title">Shanka · 閃卡</span>
+          </div>
+          <p class="card-desc">A Chinese flashcard app for building and drilling vocabulary. The name 閃卡 means "flashcard."</p>
+          <span class="card-meta"><span class="tag">Repo</span> Chinese learning</span>
+        </a>
+
+        <a class="card" href="https://github.com/dan-leif/shanka-dev">
+          <div class="card-head">
+            <span class="card-icon">🛠️</span>
+            <span class="card-title">Shanka Dev</span>
+          </div>
+          <p class="card-desc">The development workspace for Shanka — where new features and changes to the flashcard app get built and tried out.</p>
+          <span class="card-meta"><span class="tag">Repo</span> Work in progress</span>
+        </a>
+
+        <a class="card" href="https://github.com/dan-leif/ashlands-reborn">
+          <div class="card-head">
+            <span class="card-icon">⚔️</span>
+            <span class="card-title">Ashlands Reborn</span>
+          </div>
+          <p class="card-desc">A C# mod for Valheim that reworks the Ashlands biome. The mod's source and releases live here.</p>
+          <span class="card-meta"><span class="tag">Repo</span> Valheim mod · C#</span>
+        </a>
+
+        <a class="card" href="https://github.com/dan-leif/ashlands-reborn-demo">
+          <div class="card-head">
+            <span class="card-icon">🔥</span>
+            <span class="card-title">Ashlands Reborn — Showcase</span>
+          </div>
+          <p class="card-desc">A showcase page for the Ashlands Reborn Valheim mod, highlighting what it adds and changes.</p>
+          <span class="card-meta"><span class="tag">Repo</span> Mod showcase</span>
+        </a>
+
+        <a class="card" href="https://github.com/dan-leif/home-robot">
+          <div class="card-head">
+            <span class="card-icon">🤖</span>
+            <span class="card-title">Home Robot</span>
+          </div>
+          <p class="card-desc">An in-progress project exploring home robotics. Still early — see the repo for the latest.</p>
+          <span class="card-meta"><span class="tag">Repo</span> Experiment</span>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      Built and hosted from <a href="https://github.com/dan-leif/general">dan-leif/general</a>.
+    </footer>
   </div>
-
-  <footer>Sources: World Bank · IMF · BEA · historical scholarship</footer>
 </body>
 </html>
